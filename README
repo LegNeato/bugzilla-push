@@ -117,7 +117,7 @@ bug changed messages and look at 'is_open' in the status. I intend to make
 this configurable so that you can send closed and reopened messages
 
 * Object deletion messages are not sent. This is a future feature I want to add
-if at all poissible
+if at all possible
 
 * It would be nice in the future for the connection and channel to stay open
 between Bugzilla and the broker (for simplicity and performance). I'm not sure
