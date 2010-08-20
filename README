@@ -3,7 +3,8 @@ Bugzilla AMQP Extension
 This extension sends messages to a message broker via AMQP whenever a Bugzilla
 object (bug, keyword, component, etc) is created or modified.
 
-For more information, read the blog post @ http://christian.legnitto.com/blog/2010/08/20/push-notifications-for-bugzilla/.
+For more information, read the blog post:
+http://christian.legnitto.com/blog/2010/08/20/push-notifications-for-bugzilla/
 
 Please note this has not been tested in production yet! This is a very early
 release, and though it works please proceed with caution. On the plus side,
