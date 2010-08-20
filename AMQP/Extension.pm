@@ -93,10 +93,12 @@ sub _wrap {
     my ($self, $func, $args) = @_;
     my $priv_func = "_$func";
     eval { $self->$priv_func($args); };
-    if( $@ && Bugzilla->params->{'AMQP-fail-on-error'} ) {
+    if( $@ ) {
         warn "AMQP: Error while sending message: ", $func, ": ", $@;
-        $@ =~ s/\s+at .*$//;
-        ThrowCodeError($@);
+        if( Bugzilla->params->{'AMQP-fail-on-error'} ) {
+            $@ =~ s/\s+at .*$//;
+            ThrowCodeError($@);
+        }
     }
 }
 
