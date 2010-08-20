@@ -10,7 +10,7 @@ your Bugzilla installation fails until you deactivate the extension. I have
 tested it locally against Bugzilla's trunk. If you find problems with older 
 releases, let me know.
 
-You can deactiavte the extension by moving it out of the Bugzilla extension
+You can deactivate the extension by moving it out of the Bugzilla extension
 directory or placing an empty file named "disabled" in the extension directory
 and then restarting your webserver.
 
