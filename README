@@ -1,0 +1,135 @@
+Bugzilla AMQP Extension
+-----------------------
+This extension sends messages to a message broker via AMQP whenever a Bugzilla
+object (bug, keyword, component, etc) is created or modified.
+
+Please note this has not been tested in production yet! This is a very early
+release, and though it works please proceed with caution. On the plus side,
+it doesn't modify any Bugzilla data--the worst that can happen is 
+your Bugzilla installation fails until you deactivate the extension. I have
+tested it locally against Bugzilla's trunk. If you find problems with older 
+releases, let me know.
+
+You can deactiavte the extension by moving it out of the Bugzilla extension
+directory or placing an empty file named "disabled" in the extension directory
+and then restarting your webserver.
+
+WARNING! WARNING! WARNING!
+
+The message fields/formats *will likely change* in future revisions. Currently
+the messages look like:
+
+_meta:
+    'routing_key' => 'The routing key'
+    'time'        => 'Time the message was created'
+payload:
+    OBJECT_TYPE => {DUMP OF BUGZILLA OBJECT}
+    'change' => {DUMP OF BUGZILLA CHANGE REPRESENTATION}
+             (for changed messages)
+
+The envelope format and the format of the raw data will likelychange. I am currently
+doing mapping for types, but the mapping may change until I "officially" 
+decide the interface is frozen. When possible, I tried to copy the WebServices.
+All times/dates are in iso8601 format.
+
+Questions, comments, concerns: email Christian Legnitto <clegnitto@mozilla.com>
+
+
+Requirements
+-----------------------
+* You need to patch Bugzilla with the patch from 
+  https://bugzilla.mozilla.org/show_bug.cgi?id=587793.
+    (the patch is trivial and will be integrated in a later Bugzilla release)
+
+* You need to patch Bugzilla with the patch from 
+  https://bugzilla.mozilla.org/show_bug.cgi?id=589100.
+    (the patch is trivial)
+
+* Perl module Net::RabbitFoot
+    (used to actually send the AMQP messages)
+
+* Perl module Scalar::Util
+    (used to determine type of object we are messaging about, already required)
+
+* Perl module JSON >= 2.07
+    (used to serialize the message, already required)
+
+
+Installation
+-----------------------
+1. Copy the AMQP directory to the Bugzilla "extensions" directory
+2. (optional) sudo perl /path/to/bugzilla/install-module.pl [Requirements above]
+3. Login to your Bugzilla installation as an administrator
+4. Click "Administration"
+5. Click "Parameters"
+6. Click "AMQP Integration" in the left menu
+7. Insert data specific to your broker setup
+
+
+Known Issues / TODO
+-----------------------
+* Messages are always serialized with JSON. Support for other schemes will be
+added in the future
+
+* The exchanges are currently hardcoded as durable topic exchanges. I intend
+to make this configurable via the admin interface
+
+* I need to come up with stable object mappings so that consumers don't
+break when Bugzilla changes the internal representations. I'm mostly there
+
+* Comments are not supported yet (!!)
+
+* Custom fields are not supported yet
+
+* Vhosts other than "/" have not been tested / likely don't work yet. I plan to
+support them soon
+
+* I want to make the message verbosity configurable. Currently it resolves and
+includes most embedded objects, which may not be ideal for every use-case
+
+* Due to the way Bugzilla extensions work, the message is sent during a
+database transaction. If the transaction is rolled back the message will still
+be sent. I'm thinking of ways to mitigate/fix this, but it should generally
+be a non-issue for now
+
+* Currently messages are sent for each change. In the future I want to make it
+configrable between current behavior, current behavior + a changeset message,
+and only a changeset message
+
+* Related to the previous, I want to break additions (changes where the value 
+before wasn't set) removals (changes where the value was set before and not 
+after) and general changes (fields that had a value that changed) into seperate
+messages so consumers don't have to know stuff like '---' means the field was
+cleared, etc
+
+* There are no permissions! Everything is sent to the broker.
+Be aware, if you choose to send messages about secur bugs and allow public
+access to your broker you are esentially removing the bug security.
+In the future I intend to allow publishing secure bug messages to a different
+different exchange or server as well as disallowing any messages a public
+bugzilla user couldn't see
+
+* There is no support for the "usevisibilitygroups" parameter, so user messages
+are always sent even if you restrict viewing users in Bugzilla
+
+* Bug closed messages are not sent. Currently, consumers will need to listen to
+bug changed messages and look at 'is_open' in the status. I intend to make
+this configurable so that you can send closed and reopened messages
+
+* Object deletion messages are not sent. This is a future feature I want to add
+if at all poissible
+
+* It would be nice in the future for the connection and channel to stay open
+between Bugzilla and the broker (for simplicity and performance). I'm not sure
+this is possible with the current extension system
+
+* There has been no performance testing, but I will (hopefully) be testing
+soon. Whenever I saw a chance to speed things up / return early I did though.
+
+* The coding style doesn't match Bugzilla's coding guidelines
+
+* I am not a Perl programmer, so I am sure there are better ways to write
+portions of the extension. I'll be doing more general code cleanup and
+solidifying as time goes on
+
+* This file is pretty much the only documentation. I need to write more!

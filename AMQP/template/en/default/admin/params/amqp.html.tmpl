@@ -1,0 +1,94 @@
+[%# The contents of this file are subject to the Mozilla Public
+# License Version 1.1 (the "License"); you may not use this file
+# except in compliance with the License. You may obtain a copy of
+# the License at http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS
+# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# rights and limitations under the License.
+#
+# The Original Code is the AMQP Bugzilla Extension.
+#
+# The Initial Developer of the Original Code is the Mozilla Foundation.
+# Portions created by the Initial Developer are Copyright (C) 2010 the
+# Initial Developer. All Rights Reserved.
+#
+# Contributor(s):
+#   Christian Legnitto <clegnitto@mozilla.com>
+#%]
+[%
+   title = "AMQP Integration"
+   desc = "Integration with a message broker via AMQP"
+%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% param_descs = {
+
+  "AMQP-hostname" => 
+    "Hostname of the message broker",
+
+  "AMQP-port" => 
+    "Port to use when connecting to the message broker",
+
+  "AMQP-username" => 
+    "Username to use when connecting to the message broker",
+
+  "AMQP-password" => 
+    "Password to use when connecting to the message broker",
+
+  "AMQP-spec-xml-path" =>
+    "Path to the XML AMQP spec definition file you want to use. Leaving "
+    _ "this value blank makes the extension use Net::RabbitFoot's default, "
+    _ "which is currently amqp0-8.xml"
+
+  "AMQP-object-created-exchange" => 
+    "Exchange to publish to when a " _ terms.Bugzilla _ " object is created. "
+    _ "You can use \"%type%\" to have the lower-case type name dynamically "
+    _ "inserted",
+
+  "AMQP-object-created-vhost" => 
+    "Virtual host to publish to when a bug is created. Default is \"/\"",
+
+  "AMQP-object-created-routingkey" => 
+    "Routing key that object creation messages will use. Default is "
+    _ "You can use \"%type%\" to have the lower-case type name dynamically "
+    _ "inserted. Default is \"%type%.new\"",
+
+  "AMQP-object-modified-exchange" => 
+    "Exchange to publish to when object field data is changed, added, or "
+    _ "removed",
+
+  "AMQP-bug-modified-vhost" => 
+    "Virtual host to publish to when object field data is changed, added, "
+    _ "or removed. Default is \"/\"",
+
+  "AMQP-object-data-changed-routingkey" => 
+    "Routing key that object data changed messages will use. "
+    _ "You can use \"%type%\" to have the lower-case type name dynamically "
+    _ "inserted and \"%field%\" for the field that changed. "
+    _ "Default is \"%type%.changed.%field%\"",
+
+  "AMQP-object-data-added-routingkey" => 
+    "Routing key that object data added messages will use. "
+    _ "You can use \"%type%\" to have the lower-case type name dynamically "
+    _ "inserted and \"%field%\" for the field that changed. "
+    _ "Default is \"%type%.added.%field%\"",
+
+  "AMQP-object-data-removed-routingkey" => 
+    "Routing key that object data removed messages will use. "
+    _ "You can use \"%type%\" to have the lower-case type name dynamically "
+    _ "inserted and \"%field%\" for the field that changed. "
+    _ "Default is \"%type%.removed.%field%\"",
+
+  "AMQP-publish-restricted-bugs" =>
+    "Choose if messages about restricted bugs (security, etc) are sent "
+    _ "to the broker. Note that if you allow public access to the message "
+    _ "broker and turn this on you are esentially opening all bugs"
+
+  "AMQP-fail-on-error" => 
+    "Decide if " _ terms.Bugzilla _ " actions should fail if the corresponding "
+    _ "AMQP messages don't send successfully",
+
+} %]
