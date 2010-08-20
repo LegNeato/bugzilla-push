@@ -27,10 +27,10 @@ payload:
     'change' => {DUMP OF BUGZILLA CHANGE REPRESENTATION}
              (for changed messages)
 
-The envelope format and the format of the raw data will likelychange. I am currently
-doing mapping for types, but the mapping may change until I "officially" 
-decide the interface is frozen. When possible, I tried to copy the WebServices.
-All times/dates are in iso8601 format.
+Both the envelope format and the format of the raw data will likely change.
+I am currently doing mapping for types, but the mapping may change until I
+"oficially" decide the interface is frozen. When possible, I tried to copy 
+the WebServices. All times/dates are in iso8601 format.
 
 Questions, comments, concerns: email Christian Legnitto <clegnitto@mozilla.com>
 
