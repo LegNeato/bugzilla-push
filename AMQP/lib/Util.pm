@@ -122,7 +122,11 @@ sub prep_object {
                 # TODO: Multiple call levels don't work
                 my $obj = $object;
                 foreach my $func (split /->/, $entry->{'from'}) {
-                    $obj = $obj->{$func} || $obj->$func;
+                    if( $obj->can($func) ) {
+                        $obj = $obj->$func;
+                    }else {
+                        $obj = $obj->{$func};
+                    }
                 }
 
                 if( $entry->{'action'} eq 'recurse' ) {

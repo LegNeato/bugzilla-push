@@ -44,10 +44,6 @@ Requirements
   https://bugzilla.mozilla.org/show_bug.cgi?id=587793.
     (the patch is trivial and will be integrated in a later Bugzilla release)
 
-* You need to patch Bugzilla with the patch from 
-  https://bugzilla.mozilla.org/show_bug.cgi?id=589100.
-    (the patch is trivial)
-
 * Perl module Net::RabbitFoot
     (used to actually send the AMQP messages)
 
