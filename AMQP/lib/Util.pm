@@ -58,6 +58,9 @@ our @EXPORT = qw(
 
     flagtype_interface
     flagtype_reverse_interface
+
+    comment_interface
+    comment_reverse_interface
     
 );
 
@@ -81,6 +84,8 @@ sub prep_object {
         $mappings = bug_interface();
     }elsif( $object->isa('Bugzilla::User') ) {
         $mappings = user_interface();
+    }elsif( $object->isa('Bugzilla::Comment') ) {
+        $mappings = comment_interface();
     }elsif( $object->isa('Bugzilla::Product') ) {
         $mappings = product_interface();
     }elsif( $object->isa('Bugzilla::Status') ) {
@@ -558,6 +563,50 @@ sub flagtype_interface {
         name => {
             type   => 'string',
             from   => 'name',
+            action => 'none',
+        },
+    };
+}
+
+sub comment_reverse_interface {
+    return _reverse_interface( comment_interface() );
+}
+
+sub comment_interface {
+    my $mappings = {
+        id => {
+            type   => 'int',
+            from   => 'comment_id',
+            action => 'none',
+        },
+        bug => {
+            type   => 'object',
+            from   => 'bug',
+            action => 'recurse',
+        },
+        attachment => {
+            type   => 'object',
+            from   => 'attachment',
+            action => 'recurse',
+        },
+        author => {
+            type   => 'object',
+            from   => 'author',
+            action => 'recurse',
+        },
+        when => {
+            type   => 'datetime',
+            from   => 'bug_when',
+            action => 'none',
+        },
+        text => {
+            type   => 'string',
+            from   => 'thetext',
+            action => 'none',
+        },
+        is_private => {
+            type   => 'boolean',
+            from   => 'isprivate',
             action => 'none',
         },
     };

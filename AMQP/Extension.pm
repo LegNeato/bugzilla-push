@@ -253,6 +253,8 @@ sub _send {
                 $mappings = attachment_reverse_interface();
             }elsif( $class eq "Bugzilla::Milestone" ) {
                 $mappings = milestone_reverse_interface();
+            }elsif( $class eq "Bugzilla::Comment" ) {
+                $mappings = comment_reverse_interface();
             }elsif( $class eq "Bugzilla::Version" ) {
                 $mappings = version_reverse_interface();
             }

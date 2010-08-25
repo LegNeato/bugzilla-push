@@ -44,6 +44,10 @@ Requirements
   https://bugzilla.mozilla.org/show_bug.cgi?id=587793.
     (the patch is trivial and will be integrated in a later Bugzilla release)
 
+* You need to patch Bugzilla with the patch from 
+  https://bugzilla.mozilla.org/show_bug.cgi?id=590334.
+    (the patch is trivial and enables comment messages)
+
 * Perl module Net::RabbitFoot
     (used to actually send the AMQP messages)
 
@@ -76,7 +80,8 @@ to make this configurable via the admin interface
 * I need to come up with stable object mappings so that consumers don't
 break when Bugzilla changes the internal representations. I'm mostly there
 
-* Comments are not supported yet (!!)
+* Comments only send comment.new messages. I want them also to send bug changed
+messages as well (perhaps with configurable behavior)
 
 * Custom fields are not supported yet
 
