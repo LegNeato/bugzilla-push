@@ -44,9 +44,10 @@ Requirements
   https://bugzilla.mozilla.org/show_bug.cgi?id=587793.
     (the patch is trivial and will be integrated in a later Bugzilla release)
 
-* You need to patch Bugzilla with the patch from 
-  https://bugzilla.mozilla.org/show_bug.cgi?id=590334.
-    (the patch is trivial and enables comment messages)
+* If you want comment messages, you need to patch Bugzilla with the patch from 
+  https://bugzilla.mozilla.org/show_bug.cgi?id=590334. The extension should
+  still work without the patch, but no messages will be sent for any events
+  related to comments
 
 * Perl module Net::RabbitFoot
     (used to actually send the AMQP messages)
