@@ -52,6 +52,10 @@ Requirements
 * Perl module Net::RabbitFoot
     (used to actually send the AMQP messages)
 
+* You should probably patch Net::RabbitFoot with the patch from
+  http://github.com/cooldaemon/RabbitFoot/commit/ec13602e3bb4d676f750a22e659bc8aedc09f16f
+  until an updated version gets in cpan (or build from RabbitFoot's source)
+
 * Perl module Scalar::Util
     (used to determine type of object we are messaging about, already required)
 
