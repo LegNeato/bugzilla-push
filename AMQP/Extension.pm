@@ -291,9 +291,7 @@ sub _send {
         }
     }
 
-    # Don't need to close here as it causes an error and the connection will
-    # be torn down at execution end anyway
-    #$ch->close();
+    $ch->close();
 }
 
 # Function to connect to the broker. We only connect once as both
