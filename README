@@ -111,15 +111,11 @@ after) and general changes (fields that had a value that changed) into seperate
 messages so consumers don't have to know stuff like '---' means the field was
 cleared, etc
 
-* There are no permissions! Everything is sent to the broker.
-Be aware, if you choose to send messages about secure bugs and allow public
+* Be aware, if you choose to send messages about secure bugs and allow public
 access to your broker you are esentially removing the bug security.
 In the future I intend to allow publishing secure bug messages to a different
 different exchange or server as well as disallowing any messages a public
 bugzilla user couldn't see
-
-* There is no support for the "usevisibilitygroups" parameter, so user messages
-are always sent even if you restrict viewing users in Bugzilla
 
 * Bug closed messages are not sent. Currently, consumers will need to listen to
 bug changed messages and look at 'is_open' in the status. I intend to make
