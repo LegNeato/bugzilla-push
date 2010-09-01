@@ -136,7 +136,6 @@ sub _send {
 
     my $class = Scalar::Util::blessed($object);
 
-    # Search objects are not interesting and would slow down performance
     if( $class =~ /Search/g ) {
         return;
     }
@@ -151,6 +150,58 @@ sub _send {
         };
         $self->_object_end_of_update($object->bug(), $changes);
         return;
+    }
+
+    # Support turning off restricted messages
+    if( !Bugzilla->params->{'AMQP-publish-restricted-messages'} ) {
+
+        # Check bugs
+        if( $class eq 'Bugzilla::Bug' && $msgtype ne 'object-created' ) {
+            # Check if the default user can see the bug
+            # (Note we can't do this for new bugs as we don't have the id yet)
+            my $default_user = new Bugzilla::User;
+            if( !$default_user->can_see_bug($object->bug_id) ) {
+                return;
+            }
+        }
+
+        # Check comments
+        if( $class eq 'Bugzilla::Comment' ) {
+            # Check if the comment is private
+            if( $object->is_private ) {
+                return;
+            }
+            # Check if the default user can see the bug
+            my $default_user = new Bugzilla::User;
+            my $bug = $object->bug;
+            if( !$default_user->can_see_bug($bug->bug_id) ) {
+                return;
+            }
+        }
+
+        # Check attachments
+        if( $class eq 'Bugzilla::Attachment' ) {
+            # Check if the attachment is private
+            if( $object->isprivate ) {
+                return;
+            }
+            # Check if the default user can see the bug
+            my $default_user = new Bugzilla::User;
+            my $bug = $object->bug;
+            if( !$default_user->can_see_bug($bug->bug_id) ) {
+                return;
+            }
+        }
+
+        # Check users
+        if( $class eq 'Bugzilla::User' ) {
+            # If the admin wants to restrict user visibility to specific groups,
+            # assume the public user isn't in that group and don't send the
+            # message 
+            if( Bugzilla->params->{'usevisibilitygroups'} ) {
+                return;
+            }
+        }
     }
 
     # Make sure we have settings we need
@@ -291,6 +342,7 @@ sub _send {
         }
     }
 
+    # Close the channel
     $ch->close();
 }
 

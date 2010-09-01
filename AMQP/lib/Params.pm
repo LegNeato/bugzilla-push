@@ -102,12 +102,11 @@ use constant get_param_list => (
    type => 'b',
    default => 1
   },
-# TODO: Figure out a way to tell if a bug is viewable by the public
-#  {
-#   name => 'AMQP-publish-restricted-bugs',
-#   type => 'b',
-#   default => 0
-#  },
+  {
+   name => 'AMQP-publish-restricted-messages',
+   type => 'b',
+   default => 0
+  },
 );
 
 1;
