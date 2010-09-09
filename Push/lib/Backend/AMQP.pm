@@ -87,7 +87,7 @@ sub can_publish {
 
     $specified ||= {};
 
-    # Make sure we have the values to connect
+    # Make sure we have the values to publish
 
     my @param_names = (
         'exchange',
@@ -104,7 +104,7 @@ sub publish {
 
     $params ||= {};
 
-    # Make sure we can publish and set vars
+    # Make sure we can publish
     $self->can_publish($params);
 
     # Set up the headers
