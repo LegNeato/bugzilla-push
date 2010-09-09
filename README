@@ -1,7 +1,7 @@
 Bugzilla Push Extension
 -----------------------
 This extension sends messages to a message broker via AMQP or STOMP
-whenever a object (bug, keyword, component, etc) is created or modified.
+whenever an object (bug, keyword, component, etc) is created or modified.
 
 For more information, read the blog post:
 http://christian.legnitto.com/blog/2010/08/20/push-notifications-for-bugzilla/
