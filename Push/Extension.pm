@@ -29,7 +29,6 @@ use base qw(Bugzilla::Extension);
 
 # Dependencies
 use Scalar::Util;
-use Net::RabbitFoot;
 use JSON qw(-convert_blessed_universally);
 
 # Use our lib
