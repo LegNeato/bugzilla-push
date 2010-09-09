@@ -10,7 +10,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
-# The Original Code is the AMQP Bugzilla Extension.
+# The Original Code is the Push Bugzilla Extension.
 #
 # The Initial Developer of the Original Code is the Mozilla Foundation.
 # Portions created by the Initial Developer are Copyright (C) 2010 the
@@ -19,7 +19,7 @@
 # Contributor(s):
 #   Christian Legnitto <clegnitto@mozilla.com>
 
-package Bugzilla::Extension::AMQP::Util;
+package Bugzilla::Extension::Push::Util;
 use strict;
 use Bugzilla::Util;
 use JSON;
@@ -152,7 +152,7 @@ sub prep_object {
                 }
             }
 
-            if( $data->{$to_field} ) {
+            if( defined $data->{$to_field} ) {
                 # Do any type translation we need
                 if( $entry->{'type'} eq 'datetime' ) {
                     # HACK: Make this a string, which is iso8601 

@@ -10,7 +10,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
-# The Original Code is the AMQP Bugzilla Extension.
+# The Original Code is the Push Bugzilla Extension.
 #
 # The Initial Developer of the Original Code is the Mozilla Foundation.
 # Portions created by the Initial Developer are Copyright (C) 2010 the
@@ -19,7 +19,7 @@
 # Contributor(s):
 #   Christian Legnitto <clegnitto@mozilla.com>
 
-package Bugzilla::Extension::AMQP;
+package Bugzilla::Extension::Push;
 
 use strict;
 use Bugzilla::Bug;
@@ -33,7 +33,7 @@ use Net::RabbitFoot;
 use JSON qw(-convert_blessed_universally);
 
 # Use our lib
-use Bugzilla::Extension::AMQP::Util;
+use Bugzilla::Extension::Push::Util;
 
 our $VERSION = '0.01';
 
@@ -41,7 +41,7 @@ our $VERSION = '0.01';
 sub config_add_panels {
     my ($self, $args) = @_;
     my $modules = $args->{'panel_modules'};
-    $modules->{'AMQP'} = 'Bugzilla::Extension::AMQP::Params';
+    $modules->{'Push'} = 'Bugzilla::Extension::Push::Params';
 }
 
 # Call our wrapper every time an object is created
@@ -94,8 +94,8 @@ sub _wrap {
     my $priv_func = "_$func";
     eval { $self->$priv_func($args); };
     if( $@ ) {
-        warn "AMQP: Error while sending message: ", $func, ": ", $@;
-        if( Bugzilla->params->{'AMQP-fail-on-error'} ) {
+        warn "Push: Error while sending message: ", $func, ": ", $@;
+        if( Bugzilla->params->{'push-fail-on-error'} ) {
             $@ =~ s/\s+at .*$//;
             ThrowCodeError($@);
         }
@@ -153,7 +153,7 @@ sub _send {
     }
 
     # Support turning off restricted messages
-    if( !Bugzilla->params->{'AMQP-publish-restricted-messages'} ) {
+    if( !Bugzilla->params->{'push-publish-restricted-messages'} ) {
 
         # Check bugs
         if( $class eq 'Bugzilla::Bug' && $msgtype ne 'object-created' ) {
@@ -204,19 +204,16 @@ sub _send {
         }
     }
 
-    # Make sure we have settings we need
-    $self->verify_publish_settings($msgtype);
-
     # Find the "type" of object (simple lower-case string)
     my $type = lc $class;
     $type =~ s/^bugzilla::([^:]+).*$/$1/g;
 
     # Process the exchange the user wants to use
-    my $exchange = Bugzilla->params->{'AMQP-'.$msgtype.'-exchange'};
+    my $exchange = Bugzilla->params->{'push-'.$msgtype.'-exchange'};
     $exchange =~ s/%type%/$type/g;
 
     # Process the vhost the user wants to use
-    my $vhost = Bugzilla->params->{'AMQP-'.$msgtype.'-vhost'};
+    my $vhost = Bugzilla->params->{'push-'.$msgtype.'-vhost'};
     $vhost =~ s/%type%/$type/g;
 
     # Set up the json encoder
@@ -230,20 +227,51 @@ sub _send {
     # translation will happen to keep a stable API
     my $prepped_object = prep_object($object);
 
-    # Connect to the broker
-    my $amqp = $self->broker_connect();
+    # Make sure there is a protocol specified
+    if( !Bugzilla->params->{'push-protocol'} ) {
+        die "missing-push-protocol";
+    }
 
-    # Open a channel
-    my $ch = $amqp->open_channel();
+    # Initialize the desired protocol backend
+    if( !$self->{'backend'} ) {
+
+        # We are using STOMP
+        if( Bugzilla->params->{'push-protocol'} eq 'STOMP' ) {
+            use Bugzilla::Extension::Push::Backend::STOMP;
+            $self->{'backend'} = new Bugzilla::Extension::Push::Backend::STOMP;
+        }
+
+        # We are using AMQP
+        if( Bugzilla->params->{'push-protocol'} eq 'AMQP' ) {
+            use Bugzilla::Extension::Push::Backend::AMQP;
+            $self->{'backend'} = new Bugzilla::Extension::Push::Backend::AMQP(
+                Bugzilla->params->{'AMQP-spec-xml-path'}
+            );
+        }
+    }
+
+    # Connect to the broker
+    $self->{'backend'}->connect({
+        hostname => Bugzilla->params->{'push-hostname'},
+        port     => Bugzilla->params->{'push-port'},
+        username => Bugzilla->params->{'push-username'},
+        password => Bugzilla->params->{'push-password'},
+    });
 
     # Get a timestamp to include in the message
     my $timestamp = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+
+    # Header support varies by backend
+    # TODO: Support more than json
+    my $headers = {
+        'content-type' => 'application/json'
+    };
     
     # Do this if we are creating a message for a new object
     if( $msgtype eq 'object-created' ) {
 
         # Process the routing key the user wants to use
-        my $routingkey = Bugzilla->params->{'AMQP-object-created-routingkey'};
+        my $routingkey = Bugzilla->params->{'push-object-created-routingkey'};
         $routingkey =~ s/%type%/$type/g;
 
         # Create the message in the proper format
@@ -254,13 +282,14 @@ sub _send {
         );
 
         # Send the message
-        $self->publish_message($ch,
-                               $exchange,
-                               $vhost,
-                               $routingkey,
-                               $json->encode($msg), 
-                               { content_type => 'application/json' },
-        );
+        $self->{'backend'}->publish({
+            exchange     => $exchange,
+            vhost        => $vhost,
+            message      => $json->encode($msg),
+            message_type => $msgtype,
+            routing_key  => $routingkey,
+            headers      => $headers
+        });
     }
 
     # Do this if we are creating a message for a changed object
@@ -316,7 +345,7 @@ sub _send {
             }
 
             # Process the routing key the user wants to use
-            my $routingkey = Bugzilla->params->{'AMQP-object-data-changed-routingkey'};
+            my $routingkey = Bugzilla->params->{'push-object-data-changed-routingkey'};
             $routingkey =~ s/%type%/$type/g;
             $routingkey =~ s/%field%/$replacement/g;
 
@@ -332,79 +361,19 @@ sub _send {
             );
 
             # Send the message
-            $self->publish_message($ch,
-                                   $exchange,
-                                   $vhost,
-                                   $routingkey,
-                                   $json->encode($msg), 
-                                  { content_type => 'application/json' },
-            );
+            $self->{'backend'}->publish({
+                exchange     => $exchange,
+                vhost        => $vhost,
+                message      => $json->encode($msg),
+                message_type => $msgtype,
+                routing_key  => $routingkey,
+                headers      => $headers
+            });
         }
     }
 
-    # Close the channel
-    $ch->close();
-}
+    $self->{'backend'}->disconnect();
 
-# Function to connect to the broker. We only connect once as both
-# Net::RabbitFoot (which we are using) and Net::AMQP::Simple (which we were
-# using before) fail miserably if we connect and disconnect in the same
-# script execution
-sub broker_connect {
-    my ($self) = @_;
-
-    # If we have already connected, return the connection
-    if( $self->{'amqp_conn'} ) {
-        return $self->{'amqp_conn'};
-    }
-
-    # Make sure we have the values to connect
-    my @param_names = (
-        'AMQP-hostname',
-        'AMQP-port',
-        'AMQP-username',
-        'AMQP-password',
-    );
-    foreach my $param (@param_names) {
-        if( !Bugzilla->params->{$param} ) {
-            die "missing-$param";
-        }
-    }
-
-    # Make our RabbitFoot connection object
-    $self->{'amqp_conn'} = Net::RabbitFoot->new();
-
-    # Load in the AMQP configuration
-    my $spec = Bugzilla->params->{'AMQP-spec-xml-path'} ||
-                     $self->{'amqp_conn'}->default_amqp_spec();
-
-    $self->{'amqp_conn'}->load_xml_spec($spec);
-
-    # Connect to the broker
-    $self->{'amqp_conn'}->connect(
-        host    => Bugzilla->params->{'AMQP-hostname'},
-        port    => Bugzilla->params->{'AMQP-port'},
-        user    => Bugzilla->params->{'AMQP-username'},
-        pass    => Bugzilla->params->{'AMQP-password'},
-        # TODO: Move this/do something useful with the vhost
-        vhost   => '/',
-        timeout => 1,
-    );
-
-    # Return our connected object
-    return $self->{'amqp_conn'};
-
-}
-
-# Check config settings needed to publish, bail if they aren't there
-sub verify_publish_settings {
-    my ($self, $pubtype) = @_;
-
-    die "missing-AMQP-".$pubtype."-exchange" unless
-         Bugzilla->params->{'AMQP-'.$pubtype.'-exchange'};
-
-    die "missing-AMQP-".$pubtype."-vhost" unless
-         Bugzilla->params->{'AMQP-'.$pubtype.'-vhost'};
 }
 
 # Creates a message in the proper format
@@ -431,28 +400,5 @@ sub msg_envelope {
 
     return $message;
 }
-
-# Actually sends the desired message
-sub publish_message {
-    my ($self, $ch, $exchange, $vhost, $routingkey, $data, $headers) = @_;
-
-    # TODO: Support configurable exchange types
-    $ch->declare_exchange(
-            exchange => $exchange,
-            type     => 'topic',
-            durable  => 1,
-            vhost    => $vhost,
-    );
-
-    # Actually send the message via AMQP
-    $ch->publish(
-            exchange    => $exchange,
-            vhost       => $vhost,
-            routing_key => $routingkey,
-            body        => $data,
-            header      => $headers,
-    );
-}
-
 
 __PACKAGE__->NAME;

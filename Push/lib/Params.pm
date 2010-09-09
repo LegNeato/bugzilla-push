@@ -10,7 +10,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
-# The Original Code is the AMQP Bugzilla Extension.
+# The Original Code is the Push Bugzilla Extension.
 #
 # The Initial Developer of the Original Code is the Mozilla Foundation.
 # Portions created by the Initial Developer are Copyright (C) 2010 the
@@ -19,7 +19,7 @@
 # Contributor(s):
 #   Christian Legnitto <clegnitto@mozilla.com>
 
-package Bugzilla::Extension::AMQP::Params;
+package Bugzilla::Extension::Push::Params;
 
 use strict;
 
@@ -28,26 +28,54 @@ use Bugzilla::Util;
 
 our $sortkey = 1250;
 
+sub check_push_protocol {
+    my $option = shift;
+
+    if( $option eq 'AMQP' ) {
+        if( !Bugzilla->feature('push_amqp') ) {
+            return "AMQP support is not available. Run checksetup.pl " .
+                   "for more details";
+        }
+    }
+
+    if( $option eq 'STOMP' ) {
+        if( !Bugzilla->feature('push_stomp') ) {
+            return "STOMP support is not available. Run checksetup.pl " .
+                   "for more details";
+        }
+    }
+
+    return "";
+}
+
 use constant get_param_list => (
   {
-   name => 'AMQP-hostname',
+   name => 'push-protocol',
+   type => 's',
+   choices => [ '', 'AMQP', 'STOMP' ],
+   default => '',
+   checker => \&check_push_protocol
+  },
+
+  {
+   name => 'push-hostname',
    type => 't',
    default => ''
   },
 
   {
-   name => 'AMQP-port',
+   name => 'push-port',
    type => 't',
-   default => '5672'
+   default => ''
   },
 
   {
-   name => 'AMQP-username',
+   name => 'push-username',
    type => 't',
    default => ''
   },
   {
-   name => 'AMQP-password',
+   name => 'push-password',
    type => 'p',
    default => ''
   },
@@ -57,53 +85,53 @@ use constant get_param_list => (
    default => ''
   },
   {
-   name => 'AMQP-object-created-exchange',
+   name => 'push-object-created-exchange',
    type => 't',
    default => ''
   },
   {
-   name => 'AMQP-object-created-vhost',
+   name => 'push-object-created-vhost',
    type => 't',
    default => '/'
   },
   {
-   name => 'AMQP-object-created-routingkey',
+   name => 'push-object-created-routingkey',
    type => 't',
-   default => "%type%.new"
+   default => '%type%.new'
   },
   {
-   name => 'AMQP-object-modified-exchange',
+   name => 'push-object-modified-exchange',
    type => 't',
    default => ''
   },
   {
-   name => 'AMQP-object-modified-vhost',
+   name => 'push-object-modified-vhost',
    type => 't',
    default => '/'
   },
   {
-   name => 'AMQP-object-data-changed-routingkey',
+   name => 'push-object-data-changed-routingkey',
    type => 't',
-   default => "%type%.changed.%field%"
+   default => '%type%.changed.%field%'
   },
 # TODO: Differentiate between data that has changed, been added, or been removed
 #  {
-#   name => 'AMQP-object-data-added-routingkey',
+#   name => 'push-object-data-added-routingkey',
 #   type => 't',
 #   default => "%type%.added.%field%"
 #  },
 #  {
-#   name => 'AMQP-object-data-removed-routingkey',
+#   name => 'push-object-data-removed-routingkey',
 #   type => 't',
 #   default => "%type%.removed.%field%"
 #  },
   {
-   name => 'AMQP-fail-on-error',
+   name => 'push-fail-on-error',
    type => 'b',
    default => 1
   },
   {
-   name => 'AMQP-publish-restricted-messages',
+   name => 'push-publish-restricted-messages',
    type => 'b',
    default => 0
   },

@@ -10,7 +10,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
-# The Original Code is the AMQP Bugzilla Extension.
+# The Original Code is the Push Bugzilla Extension.
 #
 # The Initial Developer of the Original Code is the Mozilla Foundation.
 # Portions created by the Initial Developer are Copyright (C) 2010 the
@@ -19,17 +19,12 @@
 # Contributor(s):
 #   Christian Legnitto <clegnitto@mozilla.com>
 
-package Bugzilla::Extension::AMQP;
+package Bugzilla::Extension::Push;
 use strict;
 
-use constant NAME => 'AMQP';
+use constant NAME => 'Push';
 
 use constant REQUIRED_MODULES => [
-    {
-        package => "Net-RabbitFoot",
-        module  => "Net::RabbitFoot",
-        version => 0,
-    },
     {
         package => "Scalar-Util",
         module  => "Scalar::Util",
@@ -43,6 +38,18 @@ use constant REQUIRED_MODULES => [
 ];
 
 use constant OPTIONAL_MODULES => [
+    {
+        package => "Net-RabbitFoot",
+        module  => "Net::RabbitFoot",
+        version => 0,
+        feature => ['push_amqp'],
+    },
+    {
+        package => "Net-Stomp",
+        module  => "Net::Stomp",
+        version => 0,
+        feature => ['push_stomp'],
+    },
 ];
 
 __PACKAGE__->NAME;

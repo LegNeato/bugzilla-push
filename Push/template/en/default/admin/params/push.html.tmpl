@@ -8,7 +8,7 @@
 # implied. See the License for the specific language governing
 # rights and limitations under the License.
 #
-# The Original Code is the AMQP Bugzilla Extension.
+# The Original Code is the Push Bugzilla Extension.
 #
 # The Initial Developer of the Original Code is the Mozilla Foundation.
 # Portions created by the Initial Developer are Copyright (C) 2010 the
@@ -18,77 +18,82 @@
 #   Christian Legnitto <clegnitto@mozilla.com>
 #%]
 [%
-   title = "AMQP Integration"
-   desc = "Integration with a message broker via AMQP"
+   title = "Push Integration"
+   desc = "Integration with a message broker via AMQP or STOMP"
 %]
 
 [% PROCESS global/variables.none.tmpl %]
 
 [% param_descs = {
+  "push-protocol" => 
+    "Protocol to use to talk to the message broker. For AMQP you need to have "
+    _ "Net::RabbitFoot installed. For STOMP you need to have Net::STOMP",
 
-  "AMQP-hostname" => 
+  "push-hostname" => 
     "Hostname of the message broker",
 
-  "AMQP-port" => 
-    "Port to use when connecting to the message broker",
+  "push-port" => 
+    "Port to use when connecting to the message broker. Leaving this blank "
+    _ "will use the default for the protocol set above",
 
-  "AMQP-username" => 
+  "push-username" => 
     "Username to use when connecting to the message broker",
 
-  "AMQP-password" => 
+  "push-password" => 
     "Password to use when connecting to the message broker",
 
   "AMQP-spec-xml-path" =>
     "Path to the XML AMQP spec definition file you want to use. Leaving "
     _ "this value blank makes the extension use Net::RabbitFoot's default, "
-    _ "which is currently amqp0-8.xml"
+    _ "which is currently amqp0-8.xml. You do not need to set this if using "
+    _ "STOMP above",
 
-  "AMQP-object-created-exchange" => 
+  "push-object-created-exchange" => 
     "Exchange to publish to when a " _ terms.Bugzilla _ " object is created. "
     _ "You can use \"%type%\" to have the lower-case type name dynamically "
     _ "inserted",
 
-  "AMQP-object-created-vhost" => 
+  "push-object-created-vhost" => 
     "Virtual host to publish to when a bug is created. Default is \"/\"",
 
-  "AMQP-object-created-routingkey" => 
+  "push-object-created-routingkey" => 
     "Routing key that object creation messages will use. Default is "
     _ "You can use \"%type%\" to have the lower-case type name dynamically "
     _ "inserted. Default is \"%type%.new\"",
 
-  "AMQP-object-modified-exchange" => 
+  "push-object-modified-exchange" => 
     "Exchange to publish to when object field data is changed, added, or "
     _ "removed",
 
-  "AMQP-bug-modified-vhost" => 
+  "push-object-modified-vhost" => 
     "Virtual host to publish to when object field data is changed, added, "
     _ "or removed. Default is \"/\"",
 
-  "AMQP-object-data-changed-routingkey" => 
+  "push-object-data-changed-routingkey" => 
     "Routing key that object data changed messages will use. "
     _ "You can use \"%type%\" to have the lower-case type name dynamically "
     _ "inserted and \"%field%\" for the field that changed. "
     _ "Default is \"%type%.changed.%field%\"",
 
-  "AMQP-object-data-added-routingkey" => 
+  "push-object-data-added-routingkey" => 
     "Routing key that object data added messages will use. "
     _ "You can use \"%type%\" to have the lower-case type name dynamically "
     _ "inserted and \"%field%\" for the field that changed. "
     _ "Default is \"%type%.added.%field%\"",
 
-  "AMQP-object-data-removed-routingkey" => 
+  "push-object-data-removed-routingkey" => 
     "Routing key that object data removed messages will use. "
     _ "You can use \"%type%\" to have the lower-case type name dynamically "
     _ "inserted and \"%field%\" for the field that changed. "
     _ "Default is \"%type%.removed.%field%\"",
 
-  "AMQP-publish-restricted-messages" =>
+  "push-publish-restricted-messages" =>
     "Choose if messages about restricted items (bugs, comments, etc) are sent "
     _ "to the broker. Note that if you allow public access to the message "
     _ "broker and turn this on you are esentially opening all bugs"
 
-  "AMQP-fail-on-error" => 
+  "push-fail-on-error" => 
     "Decide if " _ terms.Bugzilla _ " actions should fail if the corresponding "
-    _ "AMQP messages don't send successfully",
+    _ "messages don't send successfully",
 
 } %]
