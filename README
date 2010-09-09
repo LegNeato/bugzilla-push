@@ -1,7 +1,7 @@
-Bugzilla AMQP Extension
+Bugzilla Push Extension
 -----------------------
-This extension sends messages to a message broker via AMQP whenever a Bugzilla
-object (bug, keyword, component, etc) is created or modified.
+This extension sends messages to a message broker via AMQP or STOMP
+whenever a object (bug, keyword, component, etc) is created or modified.
 
 For more information, read the blog post:
 http://christian.legnitto.com/blog/2010/08/20/push-notifications-for-bugzilla/
@@ -50,11 +50,14 @@ Requirements
   related to comments
 
 * Perl module Net::RabbitFoot
-    (used to actually send the AMQP messages)
+    (if you want to use AMQP)
 
 * You should probably patch Net::RabbitFoot with the patch from
   http://github.com/cooldaemon/RabbitFoot/commit/ec13602e3bb4d676f750a22e659bc8aedc09f16f
   until an updated version gets in cpan (or build from RabbitFoot's source)
+
+* Perl module Net::Stomp
+    (if you want to use STOMP)
 
 * Perl module Scalar::Util
     (used to determine type of object we are messaging about, already required)
@@ -65,12 +68,12 @@ Requirements
 
 Installation
 -----------------------
-1. Copy the AMQP directory to the Bugzilla "extensions" directory
+1. Copy the Push directory to the Bugzilla "extensions" directory
 2. (optional) sudo perl /path/to/bugzilla/install-module.pl [Requirements above]
 3. Login to your Bugzilla installation as an administrator
 4. Click "Administration"
 5. Click "Parameters"
-6. Click "AMQP Integration" in the left menu
+6. Click "Push Integration" in the left menu
 7. Insert data specific to your broker setup
 
 
@@ -90,8 +93,7 @@ messages as well (perhaps with configurable behavior)
 
 * Custom fields are not supported yet
 
-* Vhosts other than "/" have not been tested / likely don't work yet. I plan to
-support them soon
+* Vhosts other than "/" have not been tested, though they probably work
 
 * I want to make the message verbosity configurable. Currently it resolves and
 includes most embedded objects, which may not be ideal for every use-case
