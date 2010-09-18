@@ -91,7 +91,8 @@ break when Bugzilla changes the internal representations. I'm mostly there
 * Comments only send comment.new messages. I want them also to send bug changed
 messages as well (perhaps with configurable behavior)
 
-* Custom fields are not supported yet
+* Custom fields are supported as simple strings rather than objects. I plan
+to make this support more robust in the future
 
 * Vhosts other than "/" have not been tested, though they probably work
 

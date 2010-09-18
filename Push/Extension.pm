@@ -154,13 +154,24 @@ sub _send {
     # Support turning off restricted messages
     if( !Bugzilla->params->{'push-publish-restricted-messages'} ) {
 
+        # We have the extention act like the default user
+        my $default_user = new Bugzilla::User;
+
         # Check bugs
-        if( $class eq 'Bugzilla::Bug' && $msgtype ne 'object-created' ) {
-            # Check if the default user can see the bug
-            # (Note we can't do this for new bugs as we don't have the id yet)
-            my $default_user = new Bugzilla::User;
-            if( !$default_user->can_see_bug($object->bug_id) ) {
-                return;
+        if( $class eq 'Bugzilla::Bug' ) {
+
+            if( $msgtype ne 'object-created' ) {
+                # Check if the default user can see the bug
+                # (we can't do this for new bugs as we don't have the id yet)
+                if( !$default_user->can_see_bug($object->bug_id) ) {
+                    return;
+                }
+            }else {
+                # Make sure the default user has access to the product
+                # for each new bug filed, as we can't use the bug id above
+                if( !$object->product->user_has_access($default_user) ) {
+                    return;
+                }
             }
         }
 
@@ -171,7 +182,6 @@ sub _send {
                 return;
             }
             # Check if the default user can see the bug
-            my $default_user = new Bugzilla::User;
             my $bug = $object->bug;
             if( !$default_user->can_see_bug($bug->bug_id) ) {
                 return;
@@ -185,7 +195,6 @@ sub _send {
                 return;
             }
             # Check if the default user can see the bug
-            my $default_user = new Bugzilla::User;
             my $bug = $object->bug;
             if( !$default_user->can_see_bug($bug->bug_id) ) {
                 return;
@@ -198,6 +207,18 @@ sub _send {
             # assume the public user isn't in that group and don't send the
             # message 
             if( Bugzilla->params->{'usevisibilitygroups'} ) {
+                return;
+            }
+        }
+
+        # Check products
+        if( $class eq 'Bugzilla::Product' && $msgtype ne 'object-created' ) {
+            # Make sure the default user has access to the product
+            # (we can't do this check when the product is created, but that's
+            # ok as there is no way to restrict the product at creation time
+            # via the admin interface. You can only add group restrictions
+            # once the product is created)
+            if( !$object->user_has_access($default_user) ) {
                 return;
             }
         }

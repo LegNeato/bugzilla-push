@@ -109,6 +109,17 @@ sub prep_object {
 
     if( $mappings ) {
 
+        # Add support for custom fields
+        # TODO: Look up custom field type and act smarter
+        foreach my $thefield (keys %$object) {
+            if( $thefield =~ /^cf_/ ) {
+                $mappings->{$thefield} = {
+                    action => 'none',
+                    from   => $thefield,
+                };
+            }
+        }
+
         # Loop through the mappings
         foreach my $to_field (keys %$mappings) {
 
