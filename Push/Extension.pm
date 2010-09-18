@@ -154,7 +154,7 @@ sub _send {
     # Support turning off restricted messages
     if( !Bugzilla->params->{'push-publish-restricted-messages'} ) {
 
-        # We have the extention act like the default user
+        # We have the extension act like the default user
         my $default_user = new Bugzilla::User;
 
         # Check bugs
