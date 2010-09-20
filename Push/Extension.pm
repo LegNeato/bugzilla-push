@@ -335,6 +335,16 @@ sub _send {
                 }
             }
 
+            # Custom text fields go from null to ""
+            # TODO: This probably prevents a value of "0" being added
+            # if it was previously empty
+            if( $changed_field =~ /^cf_/ ) {
+                if( !$changes->{$changed_field}[0] && 
+                    !$changes->{$changed_field}[1] ) {
+                    return;
+                }
+            }
+
             # Get field name mappings
             my $mappings = {};
             if( $class eq "Bugzilla::Bug" ) {
