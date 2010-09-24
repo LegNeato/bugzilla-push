@@ -3,8 +3,14 @@ Bugzilla Push Extension
 This extension sends messages to a message broker via AMQP or STOMP
 whenever an object (bug, keyword, component, etc) is created or modified.
 
-For more information, read the blog post:
-http://christian.legnitto.com/blog/2010/08/20/push-notifications-for-bugzilla/
+For more information, read these blog posts:
+* http://christian.legnitto.com/blog/2010/08/20/push-notifications-for-bugzilla/
+* http://christian.legnitto.com/blog/2010/09/10/bugzilla-amqp-is-now-buzgilla-push-supports-the-stomp-protocol/
+
+You can also view these demo videos. Warning, they are large (recorded off a
+24 inch monitor) but the actual file size is small:
+* http://people.mozilla.org/~clegnitto/broker/demo.theora.ogv (OGG Theora)
+* http://people.mozilla.org/~clegnitto/broker/demo.webm (WebM)
 
 Please note this has not been tested in production yet! This is a very early
 release, and though it works please proceed with caution. On the plus side,
