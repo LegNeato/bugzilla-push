@@ -74,7 +74,7 @@ sub prep_object {
     my $data = {};
 
     my $mappings;
-    
+
     # Undef if we get something unexpected
     return undef unless $object && ref($object);
 
@@ -115,6 +115,7 @@ sub prep_object {
             if( $thefield =~ /^cf_/ ) {
                 $mappings->{$thefield} = {
                     action => 'none',
+                    type   => 'string',
                     from   => $thefield,
                 };
             }
@@ -292,9 +293,18 @@ sub bug_interface {
             names  => ['flag_ids'],
             action => 'recurse',
         },
-
-        # TODO: Deal with other relations
-
+        platform => {
+            type   => 'string',
+            from   => 'rep_platform',
+            names  => ['rep_platform'],
+            action => 'none',
+        },
+        operating_system => {
+            type   => 'string',
+            from   => 'op_sys',
+            names  => ['op_sys'],
+            action => 'none',
+        },
     };
 }
 

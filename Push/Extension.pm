@@ -341,7 +341,7 @@ sub _send {
             if( $changed_field =~ /^cf_/ ) {
                 if( !$changes->{$changed_field}[0] && 
                     !$changes->{$changed_field}[1] ) {
-                    return;
+                    next;
                 }
             }
 
