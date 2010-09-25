@@ -115,7 +115,6 @@ sub prep_object {
             if( $thefield =~ /^cf_/ ) {
                 $mappings->{$thefield} = {
                     action => 'none',
-                    type   => 'string',
                     from   => $thefield,
                 };
             }
