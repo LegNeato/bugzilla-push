@@ -247,6 +247,9 @@ sub _send {
     # translation will happen to keep a stable API
     my $prepped_object = prep_object($object);
 
+    # Store the user who did the action 
+    $prepped_object->{'who'} = prep_object(Bugzilla->user);
+
     # Make sure there is a protocol specified
     if( !Bugzilla->params->{'push-protocol'} ) {
         die "missing-push-protocol";
