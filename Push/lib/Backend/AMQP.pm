@@ -113,6 +113,11 @@ sub publish {
     $params->{'headers'}->{'content_type'} = $params->{'headers'}->{'content-type'};
     delete $params->{'headers'}->{'content-type'};
 
+    # user_id header has to be set to the authenticated user
+    # otherwise rabbitmq refuses connection with
+    # user_id property set to '' but authenticated user was 'bugzilla'
+    $params->{'headers'}->{'user_id'} = $params->{'username'};
+
     # Get a channel to publish to
     $self->{'channel'} = $self->{'amqp_conn'}->open_channel();
 
