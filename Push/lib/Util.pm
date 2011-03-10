@@ -238,6 +238,11 @@ sub bug_interface {
             from   => 'short_desc',
             action => 'none',
         },
+        reporter => {
+            type   => 'object',
+            from   => 'reporter',
+            action => 'recurse',
+        },
         assigned_to => {
             type   => 'object',
             from   => 'assigned_to',
