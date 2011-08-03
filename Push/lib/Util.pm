@@ -44,6 +44,9 @@ our @EXPORT = qw(
     product_interface
     product_reverse_interface
 
+    component_interface
+    component_reverse_interface
+
     milestone_interface
     milestone_reverse_interface
 
@@ -88,6 +91,8 @@ sub prep_object {
         $mappings = comment_interface();
     }elsif( $object->isa('Bugzilla::Product') ) {
         $mappings = product_interface();
+    }elsif( $object->isa('Bugzilla::Component') ) {
+        $mappings = component_interface();
     }elsif( $object->isa('Bugzilla::Status') ) {
         $mappings = status_interface();
     }elsif( $object->isa('Bugzilla::Attachment') ) {
@@ -276,9 +281,10 @@ sub bug_interface {
             action => 'recurse',
         },
         component => {
-            type   => 'string',
-            from   => 'component',
-            action => 'none',
+            type   => 'object',
+            from   => 'component_obj',
+            names  => ['component_id'],
+            action => 'recurse',
         },
         dupe_of => {
             type   => 'int',
@@ -449,6 +455,26 @@ sub product_interface {
         },
     };
 }
+
+sub component_reverse_interface {
+    return _reverse_interface( component_interface() );
+}
+
+sub component_interface {
+    my $mappings = {
+        id => {
+            type   => 'int',
+            from   => 'id',
+            action => 'none',
+        },
+        name => {
+            type   => 'string',
+            from   => 'name',
+            action => 'none',
+        },
+    };
+}
+
 
 sub version_reverse_interface {
     return _reverse_interface( version_interface() );

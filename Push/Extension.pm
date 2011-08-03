@@ -354,6 +354,8 @@ sub _send {
                 $mappings = bug_reverse_interface();
             }elsif( $class eq "Bugzilla::Product" ) {
                 $mappings = product_reverse_interface();
+            }elsif( $class eq "Bugzilla::Component" ) {
+                $mappings = component_reverse_interface();
             }elsif( $class eq "Bugzilla::Status" ) {
                 $mappings = status_reverse_interface();
             }elsif( $class eq "Bugzilla::Flag" ) {
